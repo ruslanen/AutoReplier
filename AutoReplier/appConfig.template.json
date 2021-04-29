@@ -1,0 +1,22 @@
+﻿{
+	/* Адрес электронной почты, с которой отслеживается получение новых сообщений */
+	"MailAddress": "example@example.com",
+	/* Адрес IMAP-сервера */
+	"ImapHost": "imap.example.com",
+	/* Порт IMAP-сервера */
+	"ImapPort": 993,
+	/* Разрешить SSL для IMAP */
+	"ImapSsl": true,
+	/* Интервал обновления почты (получения новых сообщений) */
+	"UpdatingIntervalDelayInSeconds": 60,
+	/* Адрес SMTP-сервера */
+	"SmtpHost": "smtp.example.com",
+	/* Порт SMTP-сервера */
+	"SmtpPort": 587,
+	/* Разрешить SSL для SMTP */
+	"SmtpSsl": true,
+	/* Интервал задержки между отправкой ответных сообщений */
+	"SendingIntervalDelayInSeconds": 2,
+	/* Адрес электронной почты, с которой приходят сообщения */
+	"MailAddressFrom": "exampleFrom@example.com"
+}
