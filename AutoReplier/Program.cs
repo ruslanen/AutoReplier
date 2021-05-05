@@ -41,7 +41,7 @@ namespace AutoReplier
 			else
 			{
 				Console.WriteLine("Введите пароль от {0}: ", appConfig.MailAddress);
-				password = Convert.ToString(Console.Read()).Trim();
+				password = Convert.ToString(Console.ReadLine()).Trim();
 			}
 
 			using (var messageReader = new MessageReader(appConfig.ImapHost, appConfig.ImapPort, appConfig.ImapSsl,
