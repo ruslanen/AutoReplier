@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,45 +22,30 @@ namespace AutoReplier
 
         public Task Track()
         {
-            // Находит содержимое между текстом <a href=" и ">Гарантируем
+            // Находит содержимое между текстом subject= и Body=Согласие
             // используется позитивная ретроспектива и позитивная опережающая проверки
-            var regexAnchor = new Regex(@"(?<=\<a href\=\"").+?(?=\""\>Гарантируем)");
-            // Находим содержимое для темы письма
-            var regexSubject = new Regex(@"act_.+?(?=\"")");
+            var subjectRegex = new Regex(@"(?<=subject\=).+?(?=\s+Body\=Соглacие)");
             _messageSender.StartSending();
             while (true)
             {
                 var allNewMessages = _messageReader.GetNewMessages();
                 foreach (var message in allNewMessages)
                 {
-                    if (message.From.Address == _fromMailAddress)
+                    if (message.From.Address == _fromMailAddress && !string.IsNullOrEmpty(message.Body))
                     {
-                        var stream = message.AlternateViews.Select(x => x.ContentStream).FirstOrDefault();
-                        using (TextReader reader = new StreamReader(stream, Encoding.UTF8, true))
+                        var subjectMatch = subjectRegex.Match(message.Body);
+                        if (subjectMatch.Success)
                         {
-                            var text = reader.ReadToEnd();
-                            var anchorContentMatch = regexAnchor.Match(text);
-                            if (anchorContentMatch.Success)
+                            _logger.Log(LogLevel.Info, "Новое сообщение добавлено в очередь отправки: " + subjectMatch.Value);
+                            _messageSender.AddToQueue(new MessageInfo
                             {
-                                var subjectMatch = regexSubject.Match(anchorContentMatch.Value);
-                                if (subjectMatch.Success)
-                                {
-                                    _logger.Log(LogLevel.Info, "Новое сообщение добавлено в очередь отправки: " + subjectMatch.Value);
-                                    _messageSender.AddToQueue(new MessageInfo
-                                    {
-                                        MailAddress = _fromMailAddress,
-                                        Subject = subjectMatch.Value,
-                                    });
-                                }
-                                else
-                                {
-                                    _logger.Log(LogLevel.Info, "Ссылка \"Гарантируем\" содержит некорректную тему письма: " + anchorContentMatch.Value);
-                                }
-                            }
-                            else
-                            {
-                                _logger.Log(LogLevel.Info, "Текст сообщения не содержит ссылки \"Гарантируем\": " + text);
-                            }
+                                MailAddress = _fromMailAddress,
+                                Subject = subjectMatch.Value,
+                            });
+                        }
+                        else
+                        {
+                            _logger.Log(LogLevel.Info, "Тело письма некорректное: " + message.Body);
                         }
                     }
                 }

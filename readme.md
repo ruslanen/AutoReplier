@@ -6,9 +6,9 @@
     <head></head>
     <body>
         ...
-        <a href=mailto:example@example.com?subject=test_12345678_123456
+        <a href = mailto:example@example.com?subject=test_12345678_123456
         Body=Соглacие>Гарантируем</a>
-        <a href=mailto:example@example.com?subject=test_12345678_123456
+        <a href = mailto:example@example.com?subject=test_12345678_123456
         Body=Несоглаcие>Нет</a>
         ...
     </body>
@@ -27,3 +27,5 @@
 Скриншот работы приложения:
 
 ![Application](img1.png)
+
+Разработано для .NET Framework 4.0 (под Windows XP)

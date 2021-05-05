@@ -37,7 +37,7 @@ namespace AutoReplier
                 _logger.Log(LogLevel.Error, "Ошибка при попытке получения сообщений: " + ex.ToString());
             }
 
-            return messages;
+            return messages != null ? messages : new MailMessage[0];
         }
 
         public void Dispose()
