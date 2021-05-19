@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,14 +12,15 @@ namespace AutoReplier
         private readonly int _delayIntervalInSeconds;
         private readonly MessageReader _messageReader;
         private readonly MessageSender _messageSender;
-        private readonly ILogger _logger = new ConsoleLogger();
+        private ILogger _logger;
 
-        public MessageMonitor(string fromMailAddress, int delayIntervalInSeconds, MessageReader messageReader, MessageSender messageSender)
+        public MessageMonitor(string fromMailAddress, int delayIntervalInSeconds, MessageReader messageReader, MessageSender messageSender, ILogger logger)
         {
             _fromMailAddress = fromMailAddress;
             _delayIntervalInSeconds = delayIntervalInSeconds;
             _messageReader = messageReader;
             _messageSender = messageSender;
+            _logger = logger;
         }
 
         public Task Track()

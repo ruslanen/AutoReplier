@@ -8,11 +8,12 @@ namespace AutoReplier
     {
         private readonly string _path;
         private AppConfig _config;
-        private ILogger _logger = new ConsoleLogger();
+        private ILogger _logger;
 
-        public ConfigReader(string path)
+        public ConfigReader(string path, ILogger logger)
         {
             _path = path;
+            _logger = logger;
         }
 
         public AppConfig Config

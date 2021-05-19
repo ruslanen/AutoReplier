@@ -5,10 +5,11 @@ namespace AutoReplier
 {
 	public class Program
 	{
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
+			var logger = new FileLogger(AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "log.txt");
 			var configPath = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "appConfig.json";
-			var configReader = new ConfigReader(configPath);
+			var configReader = new ConfigReader(configPath, logger);
 			var appConfig = configReader.Config;
 
 			string password = null;
@@ -21,16 +22,16 @@ namespace AutoReplier
 					switch (argument)
 					{
 						case "--password":
-						{
-							if (args.Length < i)
 							{
-								throw new Exception("Пропущено значение аргумента --password");
+								if (args.Length < i)
+								{
+									throw new Exception("Пропущено значение аргумента --password");
+								}
+
+								password = args[i++];
+
+								break;
 							}
-
-							password = args[i++];
-
-							break;
-						}
 						default:
 							throw new Exception("Нераспознанная команда: " + argument);
 					}
@@ -39,21 +40,17 @@ namespace AutoReplier
 				}
 			}
 			else
-			{
-				Console.WriteLine("Введите пароль от {0}: ", appConfig.MailAddress);
-				password = Convert.ToString(Console.ReadLine()).Trim();
-			}
+            {
+				password = appConfig.Password;
+            }
 
-			using (var messageReader = new MessageReader(appConfig.ImapHost, appConfig.ImapPort, appConfig.ImapSsl,
-				appConfig.MailAddress, password))
+			using (var messageReader = new MessageReader(appConfig.ImapHost, appConfig.ImapPort, appConfig.ImapSsl, appConfig.MailAddress, password, logger))
 			{
-				using (var messageSender = new MessageSender(appConfig.MailAddress, password, appConfig.SmtpHost,
-					appConfig.SmtpPort, appConfig.SmtpSsl, appConfig.SendingIntervalDelayInSeconds))
+				using (var messageSender = new MessageSender(appConfig.MailAddress, password, appConfig.SmtpHost, appConfig.SmtpPort, appConfig.SmtpSsl, appConfig.SendingIntervalDelayInSeconds, logger))
 				{
-					var messageMonitor = new MessageMonitor(appConfig.MailAddressFrom,
-						appConfig.UpdatingIntervalDelayInSeconds, messageReader, messageSender);
-					Console.WriteLine("Приложение запущено");
-					Console.WriteLine("Ожидание новых сообщений..");
+					var messageMonitor = new MessageMonitor(appConfig.MailAddressFrom,appConfig.UpdatingIntervalDelayInSeconds, messageReader, messageSender, logger);
+					logger.Log(LogLevel.Info, "Приложение запущено");
+					logger.Log(LogLevel.Info, "Ожидание новых сообщений..");
 					messageMonitor.Track();
 				}
 			}

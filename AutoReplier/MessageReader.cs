@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Mail;
 using S22.Imap;
 
@@ -8,10 +9,12 @@ namespace AutoReplier
     public class MessageReader : IDisposable
     {
         private readonly ImapClient _imapClient;
-        private readonly ILogger _logger = new ConsoleLogger();
+        private ILogger _logger;
 
-        public MessageReader(string host, int port, bool enableSsl, string email, string password)
+        public MessageReader(string host, int port, bool enableSsl, string email, string password, ILogger logger)
         {
+            _logger = logger;
+
             try
             {
                 _imapClient = new ImapClient(host, port, enableSsl);
@@ -34,7 +37,8 @@ namespace AutoReplier
             }
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.Error, "Ошибка при попытке получения сообщений: " + ex.ToString());
+                _logger.Log(LogLevel.Info, "Повторное получение сообщений: " + ex.ToString());
+                return new MailMessage[0];
             }
 
             return messages != null ? messages : new MailMessage[0];

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading;
@@ -8,15 +9,18 @@ namespace AutoReplier
 {
     public class MessageSender : IDisposable
     {
+        /// <summary>
+        /// Адрес почты, с которого производится отправка
+        /// </summary>
         private readonly string _address;
         private readonly int _sendingDelay;
 
         private Queue<MessageInfo> _sendingQueue = new Queue<MessageInfo>();
         private bool _isStopped = true;
         private readonly SmtpClient _smtpClient;
-        private readonly ILogger _logger = new ConsoleLogger();
+        private ILogger _logger;
 
-        public MessageSender(string address, string password, string host, int port, bool enableSsl, int sendingDelay)
+        public MessageSender(string address, string password, string host, int port, bool enableSsl, int sendingDelay, ILogger logger)
         {
             _address = address;
             _sendingDelay = sendingDelay;
@@ -25,6 +29,7 @@ namespace AutoReplier
                 EnableSsl = enableSsl,
                 Credentials = new NetworkCredential(address, password),
             };
+            _logger = logger;
         }
 
         public void AddToQueue(MessageInfo messageInfo)
@@ -62,6 +67,7 @@ namespace AutoReplier
                     }
                 }
             });
+            worker.IsBackground = true;
             worker.Start();
         }
 
@@ -71,6 +77,7 @@ namespace AutoReplier
             try
             {
                 _smtpClient.Send(message);
+                _smtpClient.Send(new MailMessage(_address, _address, messageInfo.Subject, messageInfo.Body));
                 _logger.Log(LogLevel.Info, "Сообщение отправлено: " + messageInfo.Subject);
             }
             catch (Exception ex)
